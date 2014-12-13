@@ -1,4 +1,4 @@
-crashit
+crashit [![npm version](https://badge.fury.io/js/crashit.svg)](http://badge.fury.io/js/crashit)
 =======
 
 A simple way of handling application crashing and normal termination the exact
