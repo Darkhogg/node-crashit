@@ -1,22 +1,26 @@
 {
   "name": "crashit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A simple way of handling application crashing and normal termination the exact same way.",
   "author": "Daniel Escoz <darkhogg+npm@gmail.com>",
-
   "repository": {
     "type": "git",
     "url": "https://github.com/Darkhogg/node-crashit"
   },
-
   "bugs": {
     "url": "https://github.com/Darkhogg/node-crashit/issues"
   },
-
   "license": "MIT",
-
+  "scripts": {
+    "test": "node_modules/.bin/mocha --ui exports --reporter spec test/test.js"
+  },
   "main": "crashit.js",
   "dependencies": {
-    "bluebird": "^2.3.11"
+    "bluebird": "^2.3.11",
+    "get-signal": "^1.0.0"
+  },
+  "devDependencies": {
+    "chai": "^1.10.0",
+    "mocha": "^2.0.1"
   }
 }

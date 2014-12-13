@@ -1,7 +1,9 @@
 var Promise = require('bluebird');
+var getSignal = require('get-signal');
 
 var EXIT_ERROR = 170;
 var EXIT_TIMEOUT = 171;
+var EXIT_UNKNOWN_SIGNAL = 166;
 
 
 /* Create a global register for the library */
@@ -37,16 +39,21 @@ function crash (reason, runHooks, timeout) {
     /* Avoid running hooks multiple times */
     G.crashed = true;
 
-    var exitCode = reason;
+    var exitCode = parseInt(reason);
 
     /* If an exception, exit code is changed */
     if (reason instanceof Error) {
         exitCode = EXIT_ERROR;
     }
 
+    /* If a SIGSOMETHING string, 128 + signal id (or 166 if unknown signal) */
+    if (typeof reason === 'string' && reason.indexOf('SIG') === 0) {
+        exitCode = (128 + getSignal.getSignalNumber(reason))
+                || EXIT_UNKNOWN_SIGNAL;
+    }
+
     /* When all hooks end, exit */
     crashPromise.then(function () {
-        console.log('Exit!');
         process.exit(exitCode);
     });
 }

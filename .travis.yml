@@ -1,0 +1,14 @@
+language: node_js
+node_js:
+- '0.11'
+- '0.10'
+- '0.8'
+- '0.6'
+deploy:
+  provider: npm
+  email: darkhogg@gmail.com
+  api_key:
+    secure: SSFWdTS1j0hGkwpAt5W5E0n/P9m/cq5cG6R0F0PkkP8hyWqx0xoKLlFr5/d0lSh1DG0e22CQzfUrU4Y/p/2Byl+2WeWa9z589BV90+x9ZBhsqK/CcxsVykAv1OErmSFsQ5faoGKftsoxw8PtN/JHlf4fLYRIrbgll2o/E3N756A=
+  on:
+    tags: true
+    repo: Darkhogg/node-crashit
