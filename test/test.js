@@ -7,12 +7,17 @@ var describe = require('mocha').describe,
 
 function callCrash (args, cb) {
     var p = cp.fork('test/_crash1.js', args);
-    p.on('exit', cb);
+    var messages = [];
+    p.on('message', function (data) {
+        messages.push(data);
+    });
+    p.on('exit', function (code) {
+        cb(code, messages);
+    });
 }
 
-
-describe('Crashing', function () {
-    this.slow(250); // Forking is slow, but that's not an issue
+describe('crashit', function () {
+    this.slow(250);
 
     /* Repeated on every test */
     function callCrashWithReasonAndCheckCode (reason, code, cb) {
@@ -37,15 +42,28 @@ describe('Crashing', function () {
     it('should exit with 170 when given a exception object', function (cb) {
         callCrashWithReasonAndCheckCode('ERR', 170, cb);
     });
-});
 
-describe('Hooks', function () {
-    it('should run hooks when asked to');
-    it('should not run hooks when not asked to');
+    it('should exit with 171 when timed out', function (cb) {
+        callCrash([0, 'timeout', 10], function (code) {
+            expect(code).to.equal(171);
+            cb();
+        });
+    });
+
+    it('should run hooks when asked to', function (cb) {
+        callCrash([0, 'yes'], function (code, msgs) {
+            expect(msgs).to.have.length(1);
+            cb();
+        });
+    });
+
+    it('should not run hooks when not asked to', function (cb) {
+        callCrash([0, 'no'], function (code, msgs) {
+            expect(msgs).to.have.length(0);
+            cb();
+        });
+    });
+
     it('should timeout after the specified time');
-    it('should exit with 171 when timed out');
-});
-
-describe('Signals', function () {
 
 });

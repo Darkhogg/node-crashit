@@ -2,7 +2,7 @@ var crashit = require('..');
 
 
 var reason = process.argv[2] || 0;
-var runHooks = process.argv[3] || false;
+var hooks = process.argv[3] || false;
 var timeout = process.argv[4] || 100;
 
 // Special Case: If reason is "ERR", give it a exception
@@ -10,4 +10,19 @@ if (reason == 'ERR') {
     reason = new Error();
 }
 
-crashit.crash(reason, runHooks, timeout);
+if (hooks == 'timeout') {
+    crashit.addHook(function (reason, cb) {
+        /* Do nothing, let it timeout */
+    });
+}
+
+if (hooks == 'yes' || hooks == 'no') {
+    crashit.addHook(function (reason) {
+        process.send('hook');
+    });
+}
+
+crashit.crash(reason, (hooks && hooks != 'no'), parseInt(timeout));
+
+/* Don't allow the process to end! */
+setInterval(function () {}, 1000);

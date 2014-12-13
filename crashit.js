@@ -32,7 +32,9 @@ function crash (reason, runHooks, timeout) {
         tmout.unref();
 
         /* Get all hook promises */
-        var promises = G.hooks.map(Function.apply);
+        var promises = G.hooks.map(function (fn) {
+            return Promise.cast(fn());
+        });
         crashPromise = Promise.settle(promises);
     }
 
@@ -67,13 +69,8 @@ function addHook (hook) {
         pHook = Promise.promisify(hook);
     }
 
-    /* Now hook either returns a promise or a value */
-    var promise = new Promise(function (resolve, reject) {
-        resolve(pHook());
-    });
-
     /* And now add it to the list of hooks! */
-    G.hooks.push(promise);
+    G.hooks.push(pHook);
 }
 
 /* Handles one or more signals */
