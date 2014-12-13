@@ -1,0 +1,9 @@
+{
+  "name": "crashit",
+  "version": "0.1.0",
+  "description": "A simple way of handling application crashing and normal termination the exact same way.",
+  "author": "Daniel Escoz <darkhogg+npm@gmail.com>",
+  "dependencies": {
+    "bluebird": "^2.3.11"
+  }
+}
