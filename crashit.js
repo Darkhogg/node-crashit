@@ -57,8 +57,8 @@ function crash (reason, runHooks, timeout) {
 
     /* When all hooks end, exit */
     crashPromise.then(function () {
-        process.removeAllListeners();
         if (isSignal) {
+            process.removeAllListeners(reson);
             process.kill(process.pid, reason);
         } else {
             process.exit(exitCode);
@@ -86,13 +86,13 @@ function handleSignals (signalOrSignals, runHooks, timeout) {
         : [signalOrSignals];
 
     signals.forEach(function (signal) {
-        process.once(signal, crash.bind(null, signal, runHooks, timeout));
+        process.on(signal, crash.bind(null, signal, runHooks, timeout));
     });
 }
 
 
 function handleUncaught (runHooks, timeout) {
-    process.once('uncaughtException', function (exc) {
+    process.on('uncaughtException', function (exc) {
         crash(exc, runHooks, timeout);
     });
 }

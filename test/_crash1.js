@@ -18,7 +18,7 @@ if (hooks == 'timeout') {
 
 if (hooks == 'yes' || hooks == 'no') {
     crashit.addHook(function (reason) {
-        process.send('hook');
+        process.send(reason);
     });
 }
 
