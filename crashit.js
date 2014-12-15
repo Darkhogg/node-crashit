@@ -85,6 +85,13 @@ function handleSignals (signalOrSignals, runHooks, timeout) {
 }
 
 
+function handleUncaught (runHooks, timeout) {
+    process.on('uncaughtException', function (exc) {
+        crash(exc, runHooks, timeout);
+    });
+}
+
 module.exports.crash = crash;
 module.exports.addHook = addHook;
 module.exports.handleSignals = handleSignals;
+module.exports.handleUncaught = handleUncaught;
