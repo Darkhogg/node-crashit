@@ -64,6 +64,8 @@ describe('crashit', function () {
         });
     });
 
+    it('should give hooks the crash reason');
+
     it('should timeout after the specified time');
 
 });

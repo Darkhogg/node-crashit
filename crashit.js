@@ -49,14 +49,19 @@ function crash (reason, runHooks, timeout) {
     }
 
     /* If a SIGSOMETHING string, 128 + signal id (or 166 if unknown signal) */
-    if (typeof reason === 'string' && reason.indexOf('SIG') === 0) {
+    var isSignal = (typeof reason === 'string' && reason.indexOf('SIG') === 0);
+    if (isSignal) {
         exitCode = (128 + getSignal.getSignalNumber(reason))
                 || EXIT_UNKNOWN_SIGNAL;
     }
 
     /* When all hooks end, exit */
     crashPromise.then(function () {
-        process.exit(exitCode);
+        if (isSignal) {
+            process.kill(process.pid, reason);
+        } else {
+            process.exit(exitCode);
+        }
     });
 }
 
