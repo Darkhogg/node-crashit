@@ -33,7 +33,7 @@ function crash (reason, runHooks, timeout) {
 
         /* Get all hook promises */
         var promises = G.hooks.map(function (fn) {
-            return Promise.cast(fn());
+            return Promise.cast(fn(reason));
         });
         crashPromise = Promise.settle(promises);
     }
