@@ -58,7 +58,7 @@ function crash (reason, runHooks, timeout) {
     /* When all hooks end, exit */
     crashPromise.then(function () {
         if (isSignal) {
-            process.removeAllListeners(reson);
+            process.removeAllListeners(reason);
             process.kill(process.pid, reason);
         } else {
             process.exit(exitCode);
