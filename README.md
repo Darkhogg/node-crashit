@@ -1,8 +1,8 @@
 crashit
 =======
 
-[![npm version](//img.shields.io/npm/v/crashit.svg?style=flat)](//www.npmjs.com/package/crashit)
-[![Build Status](//img.shields.io/travis/Darkhogg/node-crashit/master.svg?style=flat)](//travis-ci.org/Darkhogg/node-crashit)
+[![npm version](https://img.shields.io/npm/v/crashit.svg?style=flat)](//www.npmjs.com/package/crashit)
+[![Build Status](https://img.shields.io/travis/Darkhogg/node-crashit/master.svg?style=flat)](//travis-ci.org/Darkhogg/node-crashit)
 
 A simple way of handling application crashing and normal termination the exact
 same way.
