@@ -7,19 +7,23 @@ var EXIT_UNKNOWN_SIGNAL = 166;
 
 
 /* Create a global register for the library */
-if (!global['12factor-process']) {
-    global['12factor-process'] = {};
+if (!global['crashit']) {
+    global['crashit'] = {};
 }
 
 /* Obtain and fill the global object */
-var G = global['12factor-process'];
+var G = global['crashit'];
 G.hooks = G.hooks || [];
 G.signals = G.singals || [];
 G.crashed = G.crashed || false;
 
 
 /* A function that crashes the application */
-function crash (reason, runHooks, timeout) {
+function crash (reason_, runHooks_, timeout_) {
+    var reason = reason_ || 0;
+    var runHooks = (typeof runHooks_ !== 'undefined') ? runHooks_ : true
+    var timeout = timeout_ || 5000;
+
     // NOTE: All hooks are stored as promise-returning functions.  This allows
     // this code to be uniform as hell.
 
@@ -57,12 +61,7 @@ function crash (reason, runHooks, timeout) {
 
     /* When all hooks end, exit */
     crashPromise.then(function () {
-        if (isSignal) {
-            process.removeAllListeners(reason);
-            process.kill(process.pid, reason);
-        } else {
-            process.exit(exitCode);
-        }
+        process.exit(exitCode);
     });
 }
 
