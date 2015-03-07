@@ -1,6 +1,6 @@
 {
   "name": "crashit",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "A simple way of handling application crashing and normal termination the exact same way.",
   "author": "Daniel Escoz <darkhogg+npm@gmail.com>",
   "repository": {

@@ -89,13 +89,17 @@ function handleSignals (signalOrSignals, runHooks, timeout) {
     });
 }
 
-
+/* Handles uncaught exceptions */
 function handleUncaught (runHooks, timeout) {
     process.on('uncaughtException', function (exc) {
+        if (typeof runHooks !== 'undefined' && !runHooks) {
+            console.log(exc.stack);
+        }
         crash(exc, runHooks, timeout);
     });
 }
 
+/* Setup the exports */
 module.exports.crash = crash;
 module.exports.addHook = addHook;
 module.exports.handleSignals = handleSignals;
