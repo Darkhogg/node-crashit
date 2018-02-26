@@ -1,9 +1,9 @@
-var Promise = require('bluebird');
-var getSignal = require('get-signal');
+const Promise = require('bluebird');
+const getSignal = require('get-signal');
 
-var EXIT_ERROR = 170;
-var EXIT_TIMEOUT = 171;
-var EXIT_UNKNOWN_SIGNAL = 166;
+const EXIT_ERROR = 170;
+const EXIT_TIMEOUT = 171;
+const EXIT_UNKNOWN_SIGNAL = 166;
 
 
 /* Create a global register for the library */
@@ -12,100 +12,87 @@ if (!global['crashit']) {
 }
 
 /* Obtain and fill the global object */
-var G = global['crashit'];
+const G = global['crashit'];
 G.hooks = G.hooks || [];
 G.signals = G.singals || [];
 G.crashed = G.crashed || false;
 
 
+function calcExitCode (reason) {
+    /* if parses as an integer, use it */
+    const intReason = parseInt(reason);
+    if (!Number.isNaN(intReason)) {
+        return intReason;
+    }
+
+    /* If a SIGSOMETHING string, 128 + signal id (or 166 if unknown signal) */
+    if (typeof reason === 'string' && reason.indexOf('SIG') === 0) {
+        return (128 + getSignal.getSignalNumber(reason)) || EXIT_UNKNOWN_SIGNAL;
+    }
+
+    /* in ay other case, treat it as an Error */
+    return EXIT_ERROR;
+}
+
+
 /* A function that crashes the application */
-function crash (reason_, runHooks_, timeout_) {
-    var reason = reason_ || 0;
-    var runHooks = (typeof runHooks_ !== 'undefined') ? runHooks_ : true
-    var timeout = timeout_ || 5000;
+async function crash (reason_, runHooks_, timeout_) {
+    const reason = reason_ || 0;
+    const runHooks = (typeof runHooks_ !== 'undefined') ? runHooks_ : true
+    const timeout = timeout_ || 5000;
 
     // NOTE: All hooks are stored as promise-returning functions.  This allows
     // this code to be uniform as hell.
 
-    /* Default already-fulfilled promise - will be used if runHooks is false */
-    var crashPromise = Promise.resolve(null);
-
-    if (runHooks && !G.crashed) {
-        /* Set the timeout */
-        tmout = setTimeout(crash.bind(null, EXIT_TIMEOUT, false), timeout);
-        tmout.unref();
-
-        /* Get all hook promises */
-        var promises = G.hooks.map(function (fn) {
-            return Promise.cast(fn(reason));
-        });
-        crashPromise = Promise.settle(promises);
-    }
-
     /* Avoid running hooks multiple times */
+    const wasCrashed = G.crashed;
     G.crashed = true;
 
-    var exitCode = parseInt(reason);
+    /* wait for hooks to complete */
+    if (runHooks && !wasCrashed) {
+        /* Set the timeout */
+        setTimeout(crash.bind(null, EXIT_TIMEOUT, false), timeout).unref();
 
-    /* If an exception, exit code is changed */
-    if (reason instanceof Error) {
-        exitCode = EXIT_ERROR;
+        /* Get all hook promises */
+        const promises = G.hooks.map(fn => fn(reason));
+        await Promise.settle(promises);
     }
 
-    /* If a SIGSOMETHING string, 128 + signal id (or 166 if unknown signal) */
-    var isSignal = (typeof reason === 'string' && reason.indexOf('SIG') === 0);
-    if (isSignal) {
-        exitCode = (128 + getSignal.getSignalNumber(reason))
-                || EXIT_UNKNOWN_SIGNAL;
-    }
-
-    /* When all hooks end, exit */
-    crashPromise.then(function () {
-        process.exit(exitCode);
-    });
+    /* find out the exit code we should use */
+    const exitCode = calcExitCode(reason);
+    process.exit(exitCode);
 }
 
 /* Add a crash hook */
 function addHook (hook) {
-    var pHook = hook;
-
-    if (hook.length > 1) {
-        /* Accepting a nodeback -- promisify it */
-        pHook = Promise.promisify(hook);
-    }
-
-    /* And now add it to the list of hooks! */
+    /* Accepting a nodeback, promisify it; else, store as it */
+    const pHook = (hook.length > 1) ? Promise.promisify(hook) : hook;
     G.hooks.push(pHook);
 }
 
 /* Handles one or more signals */
-function handleSignals (signalOrSignals, runHooks, timeout) {
-    var signals = Array.isArray(signalOrSignals)
-        ? signalOrSignals
-        : [signalOrSignals];
-
-    signals.forEach(function (signal) {
-        process.on(signal, crash.bind(null, signal, runHooks, timeout));
-    });
+function handleSignals (sigOrSigs, runHooks, timeout) {
+    const sigs = Array.isArray(sigOrSigs) ? sigOrSigs : [sigOrSigs];
+    sigs.forEach(s => process.on(s, crash.bind(null, s, runHooks, timeout)));
 }
 
 /* Handles uncaught exceptions */
 function handleExceptions (runHooks, timeout) {
-    process.on('uncaughtException', function (exc) {
+    process.on('uncaughtException', err => {
         if (typeof runHooks !== 'undefined' && !runHooks) {
-            console.log(exc.stack || exc);
+            console.log(err.stack || err);
         }
-        crash(exc, runHooks, timeout);
+        crash(err, runHooks, timeout);
     });
 }
 
 /* Handles unhandled rejections */
 function handleRejections (runHooks, timeout) {
-    process.on('unhandledRejection', function (exc) {
+    process.on('unhandledRejection', err => {
         if (typeof runHooks !== 'undefined' && !runHooks) {
-            console.log(exc.stack || exc);
+            console.log(err.stack || err);
         }
-        crash(exc, runHooks, timeout);
+        crash(err, runHooks, timeout);
     });
 }
 
@@ -116,9 +103,9 @@ function handleUncaught (runHooks, timeout) {
 }
 
 /* Setup the exports */
-module.exports.crash = crash;
-module.exports.addHook = addHook;
-module.exports.handleSignals = handleSignals;
-module.exports.handleExceptions = handleExceptions;
-module.exports.handleRejections = handleRejections;
-module.exports.handleUncaught = handleUncaught;
+exports.crash = crash;
+exports.addHook = addHook;
+exports.handleSignals = handleSignals;
+exports.handleExceptions = handleExceptions;
+exports.handleRejections = handleRejections;
+exports.handleUncaught = handleUncaught;

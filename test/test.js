@@ -5,14 +5,43 @@ const {describe, it} = require('mocha');
 
 
 function callCrash (args, cb) {
-    const p = cp.fork('test/_crash1.js', args);
+    const p = cp.fork('test/_crash.js', args, {silent: true});
     const messages = [];
-    p.on('message', function (data) {
-        messages.push(data);
-    });
-    p.on('exit', function (code) {
-        cb(code, messages);
-    });
+
+    p.on('message', data => messages.push(data));
+    p.on('exit', code => cb(code, messages));
+}
+
+function callCrashSignal (cb) {
+    const p = cp.fork('test/_crashSignal.js', [], {silent: true});
+    const messages = [];
+
+    p.on('message', data => (data === 'READY') ? p.kill('SIGINT') : messages.push(data));
+    p.on('exit', code => cb(code, messages));
+}
+
+function callHandleSignal (args, cb) {
+    const p = cp.fork('test/_handleSignal.js', args, {silent: true});
+    const messages = [];
+
+    p.on('message', data => (data === 'READY') ? p.kill('SIGINT') : messages.push(data));
+    p.on('exit', code => cb(code, messages));
+}
+
+function callHandleException (args, cb) {
+    const p = cp.fork('test/_handleException.js', args, {silent: true});
+    const messages = [];
+
+    p.on('message', data => messages.push(data));
+    p.on('exit', code => cb(code, messages));
+}
+
+function callHandleRejections (args, cb) {
+    const p = cp.fork('test/_handleRejection.js', args, {silent: true});
+    const messages = [];
+
+    p.on('message', data => messages.push(data));
+    p.on('exit', code => cb(code, messages));
 }
 
 
@@ -28,7 +57,6 @@ describe('crashit', function () {
     }
 
     describe('misc', function () {
-
         it('should give hooks the crash reason', function (cb) {
             callCrash([42, 'yes'], function (code, msgs) {
                 expect(msgs).to.have.length(1);
@@ -37,8 +65,13 @@ describe('crashit', function () {
             });
         });
 
-        it('should respond to a signal by running hooks with the signal reason');
-
+        it('should respond to a signal by running hooks with the signal reason', function (cb) {
+            callCrashSignal(function (code, msgs) {
+                expect(msgs).to.have.length(1);
+                expect(msgs[0]).to.equal('SIGINT');
+                cb();
+            });
+        });
     })
 
     describe('exit code', function () {
@@ -109,15 +142,63 @@ describe('crashit', function () {
             });
         });
 
-        it('should timeout after the specified time');
+        it('should timeout after the specified time', function (cb) {
+            this.slow(1000);
+
+            const TIME = 500;
+            const start = process.hrtime();
+            callCrash([0, 'timeout', TIME], function (code) {
+                const diff = process.hrtime(start);
+                const diffMs = (diff[0] * 1e3) + (diff[1] / 1e6);
+
+                expect(diffMs).to.be.gte(TIME);
+                expect(diffMs).to.be.lt(TIME * 1.5);
+                cb();
+            });
+        });
     });
 
     describe('handlers', function () {
-        it('should handle signals if asked to');
-        it('should not handle signals if not asked to');
-        it('should handle uncaught exceptions if asked to');
-        it('should not handle uncaught exceptions if not asked to');
-        it('should handle unhandled rejections if asked to');
-        it('should not handle unhandled rejections if not asked to');
+        it('should handle signals if asked to', function (cb) {
+            callHandleSignal(['yes'], (code, msgs) => {
+                expect(msgs).to.have.length(1);
+                cb();
+            });
+        });
+
+        it('should not handle signals if not asked to', function (cb) {
+            callHandleSignal(['no'], (code, msgs) => {
+                expect(msgs).to.have.length(0);
+                cb();
+            });
+        });
+
+        it('should handle uncaught exceptions if asked to', function (cb) {
+            callHandleException(['yes'], (code, msgs) => {
+                expect(msgs).to.have.length(1);
+                cb();
+            });
+        });
+
+        it('should not handle uncaught exceptions if not asked to', function (cb) {
+            callHandleException(['no'], (code, msgs) => {
+                expect(msgs).to.have.length(0);
+                cb();
+            });
+        });
+
+        it('should handle unhandled rejections if asked to', function (cb) {
+            callHandleRejections(['yes'], (code, msgs) => {
+                expect(msgs).to.have.length(1);
+                cb();
+            });
+        });
+
+        it('should not handle unhandled rejections if not asked to', function (cb) {
+            callHandleRejections(['no'], (code, msgs) => {
+                expect(msgs).to.have.length(0);
+                cb();
+            });
+        });
     })
 });

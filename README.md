@@ -35,7 +35,7 @@ Crashes the current process with the given `reason`.
   + `reason`: The reason of the crash.  This can be one of the following:
 
       - An integer, which will be passed to `process.exit` directly.
-      - A signal name, which will be passed to `process.exit`.
+      - A signal name.
       - An exception object.
 
     When anything is passed as a `reason` other than 0, the process will exit
@@ -57,6 +57,16 @@ Crashes the current process with the given `reason`.
 
     Its default value is `5000`, that is, *five seconds*.
 
+The process will be ended by using `process.exit`, and will be passed a value
+that depends on the `reason`:
+
+  - If `reason` was an integer, it's passed to `process.exit`.
+  - If `reason` was a string, it's interpreted as a signal name and
+    `process.exit` receives `128 + signalNumber`, unless the string was not the
+    name of a signal, in which case it receives `166`.
+  - If `reason` was an error object, `process.exit` is passed the value `166`.
+  - If the execution of the hooks times out, `process.exit` is called with the
+    value `171`.
 
 ### `crashit.addHook(hook)`
 
