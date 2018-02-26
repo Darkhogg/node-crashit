@@ -15,7 +15,7 @@
     "test": "mocha test/test.js",
     "test-coverage": "nyc --reporter=lcov mocha test/test.js"
   },
-  "main": "crashit.js",
+  "main": "lib/crashit.js",
   "dependencies": {
     "bluebird": "^3.5.1",
     "get-signal": "^1.0.0"
