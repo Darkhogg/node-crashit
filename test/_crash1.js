@@ -24,5 +24,5 @@ if (hooks == 'yes' || hooks == 'no') {
 
 crashit.crash(reason, (hooks && hooks != 'no'), parseInt(timeout));
 
-/* Don't allow the process to end! */
-setInterval(function () {}, 1000);
+/* Don't allow the process to end for a while! */
+setTimeout(function () {}, 150000);

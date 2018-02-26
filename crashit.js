@@ -90,17 +90,35 @@ function handleSignals (signalOrSignals, runHooks, timeout) {
 }
 
 /* Handles uncaught exceptions */
-function handleUncaught (runHooks, timeout) {
+function handleExceptions (runHooks, timeout) {
     process.on('uncaughtException', function (exc) {
         if (typeof runHooks !== 'undefined' && !runHooks) {
-            console.log(exc.stack);
+            console.log(exc.stack || exc);
         }
         crash(exc, runHooks, timeout);
     });
+}
+
+/* Handles unhandled rejections */
+function handleRejections (runHooks, timeout) {
+    process.on('unhandledRejection', function (exc) {
+        if (typeof runHooks !== 'undefined' && !runHooks) {
+            console.log(exc.stack || exc);
+        }
+        crash(exc, runHooks, timeout);
+    });
+}
+
+/* Handle everything uncaught */
+function handleUncaught (runHooks, timeout) {
+    handleExceptions(runHooks, timeout);
+    handleRejections(runHooks, timeout);
 }
 
 /* Setup the exports */
 module.exports.crash = crash;
 module.exports.addHook = addHook;
 module.exports.handleSignals = handleSignals;
+module.exports.handleExceptions = handleExceptions;
+module.exports.handleRejections = handleRejections;
 module.exports.handleUncaught = handleUncaught;

@@ -30,8 +30,7 @@ set a timeout after which the process is *just crashed*.
 
 ### `crashit.crash([reason[, runHooks[, timeout]]])`
 
-Crashes the current process with the given `reason`.  Let's look into the
-arguments in detail:
+Crashes the current process with the given `reason`.
 
   + `reason`: The reason of the crash.  This can be one of the following:
 
@@ -85,7 +84,7 @@ ignored.
 
   [promises-aplus]: https://promisesaplus.com/ "Promises/A+"
 
-There's one guarantee about hooks: They will never be run twice.
+There's one guarantee about hooks: They will never run twice.
 
 
 ### `crashit.handleSignals(signals[, runHooks[, timeout]])`
@@ -108,10 +107,28 @@ what happens.  Most likely, all handler are called at once and the fastest
 wins.  *In any case, crash hooks are never run twice*.
 
 
-### `crashit.handleUncaught([runHooks[, timeout]])`
+### `crashit.handleExceptions([runHooks[, timeout]])`
 
 Sets up an uncaught exception handler that instantly performs a crash with the
 offending exception as reason.  The handler will print a stack trace to the
 screen *if and only if* the `runHooks` option is set to `false`.  This ensures
 a trace is written even if the handler is configured to not run any hooks.
-Note that this means that you should print the stack trace yourself in a hook.
+
+Note that this means that you should print the stack trace yourself in a hook
+when setting `runHooks` to `true`.
+
+
+### `crashit.handleRejections([runHooks[, timeout]])`
+
+Sets up an unhandled rejection handler that instantly performs a crash with the
+offending exception as reason.  The handler will print a stack trace to the
+screen *if and only if* the `runHooks` option is set to `false`.  This ensures
+a trace is written even if the handler is configured to not run any hooks.
+
+Note that this means that you should print the stack trace yourself in a hook
+when setting `runHooks` to `true`.
+
+
+### `crashit.handleUncaught([runHooks[, timeout]])`
+
+Calls `handleExceptions` and `handleRejections` with the same arguments.

@@ -1,13 +1,12 @@
-var cp = require('child_process');
+const cp = require('child_process');
 
-var expect = require('chai').expect;
-var describe = require('mocha').describe,
-    it       = require('mocha').it;
+const {expect} = require('chai');
+const {describe, it} = require('mocha');
 
 
 function callCrash (args, cb) {
-    var p = cp.fork('test/_crash1.js', args);
-    var messages = [];
+    const p = cp.fork('test/_crash1.js', args);
+    const messages = [];
     p.on('message', function (data) {
         messages.push(data);
     });
@@ -15,6 +14,7 @@ function callCrash (args, cb) {
         cb(code, messages);
     });
 }
+
 
 describe('crashit', function () {
     this.slow(250);
@@ -42,7 +42,6 @@ describe('crashit', function () {
     })
 
     describe('exit code', function () {
-
         it('should exit cleanly when not given a reason', function (cb) {
             callCrashWithReasonAndCheckCode(0, 0, cb);
         });
@@ -65,11 +64,9 @@ describe('crashit', function () {
                 cb();
             });
         });
-
     });
 
     describe('hooks', function () {
-
         it('should run hooks when asked to by int reason', function (cb) {
             callCrash([0, 'yes'], function (code, msgs) {
                 expect(msgs).to.have.length(1);
@@ -91,21 +88,21 @@ describe('crashit', function () {
             });
         });
 
-        it('should not run hooks when not asked to', function (cb) {
+        it('should not run hooks when not asked to by int reason', function (cb) {
             callCrash([0, 'no'], function (code, msgs) {
                 expect(msgs).to.have.length(0);
                 cb();
             });
         });
 
-        it('should not run hooks when not asked to', function (cb) {
+        it('should not run hooks when not asked to by signal reason', function (cb) {
             callCrash(['SIGINT', 'no'], function (code, msgs) {
                 expect(msgs).to.have.length(0);
                 cb();
             });
         });
 
-        it('should not run hooks when not asked to', function (cb) {
+        it('should not run hooks when not asked to by error reason', function (cb) {
             callCrash(['ERR', 'no'], function (code, msgs) {
                 expect(msgs).to.have.length(0);
                 cb();
@@ -113,7 +110,14 @@ describe('crashit', function () {
         });
 
         it('should timeout after the specified time');
-
     });
 
+    describe('handlers', function () {
+        it('should handle signals if asked to');
+        it('should not handle signals if not asked to');
+        it('should handle uncaught exceptions if asked to');
+        it('should not handle uncaught exceptions if not asked to');
+        it('should handle unhandled rejections if asked to');
+        it('should not handle unhandled rejections if not asked to');
+    })
 });

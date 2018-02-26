@@ -1,6 +1,6 @@
 {
   "name": "crashit",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "A simple way of handling application crashing and normal termination the exact same way.",
   "author": "Daniel Escoz <darkhogg+npm@gmail.com>",
   "repository": {
@@ -24,6 +24,6 @@
     "mocha": "^2.0.1"
   },
   "engines": {
-    "node": ">=0.10.3 <0.11"
+    "node": ">=8.9.4"
   }
 }
