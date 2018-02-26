@@ -76,24 +76,21 @@ function handleSignals (sigOrSigs, runHooks, timeout) {
     sigs.forEach(s => process.on(s, crash.bind(null, s, runHooks, timeout)));
 }
 
+function onUncaught (err, runHooks, timeout) {
+    if (typeof runHooks !== 'undefined' && !runHooks) {
+        console.log(err.stack || err);
+    }
+    crash(err, runHooks, timeout);
+}
+
 /* Handles uncaught exceptions */
 function handleExceptions (runHooks, timeout) {
-    process.on('uncaughtException', err => {
-        if (typeof runHooks !== 'undefined' && !runHooks) {
-            console.log(err.stack || err);
-        }
-        crash(err, runHooks, timeout);
-    });
+    process.on('uncaughtException', err => onUncaught(err, runHooks, timeout));
 }
 
 /* Handles unhandled rejections */
 function handleRejections (runHooks, timeout) {
-    process.on('unhandledRejection', err => {
-        if (typeof runHooks !== 'undefined' && !runHooks) {
-            console.log(err.stack || err);
-        }
-        crash(err, runHooks, timeout);
-    });
+    process.on('unhandledRejection', err => onUncaught(err, runHooks, timeout));
 }
 
 /* Handle everything uncaught */
