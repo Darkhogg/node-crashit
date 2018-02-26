@@ -3,6 +3,8 @@ crashit
 
 [![npm version](https://img.shields.io/npm/v/crashit.svg?style=flat)](//www.npmjs.com/package/crashit)
 [![Build Status](https://img.shields.io/travis/Darkhogg/node-crashit/master.svg?style=flat)](//travis-ci.org/Darkhogg/node-crashit)
+[![Maintainability](https://api.codeclimate.com/v1/badges/554a1b2cc3c4a8d43351/maintainability)](https://codeclimate.com/github/Darkhogg/node-crashit/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/554a1b2cc3c4a8d43351/test_coverage)](https://codeclimate.com/github/Darkhogg/node-crashit/test_coverage)
 
 A simple way of handling application crashing and normal termination the exact
 same way.
