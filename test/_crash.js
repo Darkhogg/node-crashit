@@ -19,6 +19,7 @@ if (hooks == 'yes' || hooks == 'no') {
     crashit.addHook((reason, cb) => process.send(reason, cb));
 }
 
+process.send('START');
 crashit.crash(reason, (hooks && hooks != 'no'), parseInt(timeout));
 
 /* Don't allow the process to end for a while! */

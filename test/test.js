@@ -7,9 +7,10 @@ const {describe, it} = require('mocha');
 function callCrash (args, cb) {
     const p = cp.fork('test/_crash.js', args, {silent: true});
     const messages = [];
+    let start = process.hrtime();
 
-    p.on('message', data => messages.push(data));
-    p.on('exit', code => cb(code, messages));
+    p.on('message', data => (data === 'START') ? (start = process.hrtime()) : messages.push(data));
+    p.on('exit', code => cb(code, messages, start));
 }
 
 function callCrashSignal (cb) {
@@ -146,8 +147,7 @@ describe('crashit', function () {
             this.slow(1000);
 
             const TIME = 500;
-            const start = process.hrtime();
-            callCrash([0, 'timeout', TIME], function (code) {
+            callCrash([0, 'timeout', TIME], function (code, msgs, start) {
                 const diff = process.hrtime(start);
                 const diffMs = (diff[0] * 1e3) + (diff[1] / 1e6);
 
